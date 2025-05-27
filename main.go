@@ -2,6 +2,10 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
+	"sort"
+	"sync"
+	"time"
 )
 
 const (
@@ -11,30 +15,63 @@ const (
 
 // generateRandomElements generates random elements.
 func generateRandomElements(size int) []int {
-	// ваш код здесь
+	if size <= 0 {
+		return []int{}
+	}
+	numbers := make([]int, size)
+	for i := 0; i < size; i++ {
+		numbers[i] = rand.Int()
+	}
+	return numbers
 }
 
 // maximum returns the maximum number of elements.
 func maximum(data []int) int {
-	// ваш код здесь
+	if len(data) == 0 {
+		return 0
+	}
+	sort.Ints(data)
+	return data[len(data)-1]
 }
+
+var s sync.WaitGroup
 
 // maxChunks returns the maximum number of elements in a chunks.
 func maxChunks(data []int) int {
-	// ваш код здесь
+	chunkSize := len(data) / 8
+	var maxValuesFromChunks []int
+
+	s.Add(CHUNKS)
+	for i := 0; i < CHUNKS; i++ {
+		j := i * chunkSize
+		x := j + chunkSize
+		go func(chunk []int) {
+			defer s.Done()
+			maxValuesFromChunks = append(maxValuesFromChunks, maximum(chunk))
+		}(data[j:x])
+	}
+	s.Wait()
+
+	return maximum(maxValuesFromChunks)
 }
 
 func main() {
-	fmt.Printf("Генерируем %d целых чисел", SIZE)
-	// ваш код здесь
+	fmt.Printf("Генерируем %d целых чисел\n", SIZE)
+	randomNumbers := generateRandomElements(SIZE)
 
 	fmt.Println("Ищем максимальное значение в один поток")
-	// ваш код здесь
+	timeFrom := time.Now()
+	maxNumber := maximum(randomNumbers)
+	timeTo := time.Now()
+	elapsed := timeTo.Sub(timeFrom).Microseconds()
 
-	fmt.Printf("Максимальное значение элемента: %d\nВремя поиска: %d ms\n", max, elapsed)
+	fmt.Printf("Максимальное значение элемента: %d\nВремя поиска: %d ms\n", maxNumber, elapsed)
 
 	fmt.Printf("Ищем максимальное значение в %d потоков", CHUNKS)
-	// ваш код здесь
+	timeFrom = time.Now()
+	maxNumber = maxChunks(randomNumbers)
+	timeTo = time.Now()
+	elapsed = timeTo.Sub(timeFrom).Microseconds()
 
-	fmt.Printf("Максимальное значение элемента: %d\nВремя поиска: %d ms\n", max, elapsed)
+	fmt.Printf("Максимальное значение элемента: %d\nВремя поиска: %d ms\n", maxNumber, elapsed)
 }
