@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 	"math/rand"
-	"sort"
+	"slices"
 	"sync"
 	"time"
 )
 
 const (
-	SIZE   = 100_000_000
+	SIZE   = 10 //100_000_000
 	CHUNKS = 8
 )
 
@@ -30,22 +30,26 @@ func maximum(data []int) int {
 	if len(data) == 0 {
 		return 0
 	}
-	sort.Ints(data)
-	return data[len(data)-1]
+	return slices.Max(data)
 }
 
 var s sync.WaitGroup
 
 // maxChunks returns the maximum number of elements in a chunks.
 func maxChunks(data []int) int {
-	chunkSize := len(data) / 8
+	chunkSize := len(data) / CHUNKS
 	var maxValuesFromChunks []int
 
 	s.Add(CHUNKS)
 	for i := 0; i < CHUNKS; i++ {
 		j := i * chunkSize
 		x := j + chunkSize
-		go func(chunk []int) {
+
+		if i == CHUNKS-1 {
+			x = len(data)
+		}
+
+		func(chunk []int) {
 			defer s.Done()
 			maxValuesFromChunks = append(maxValuesFromChunks, maximum(chunk))
 		}(data[j:x])
