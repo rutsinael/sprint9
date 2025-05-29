@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	SIZE   = 1100_000_000
+	SIZE   = 100_000_000
 	CHUNKS = 8
 )
 
