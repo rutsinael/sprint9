@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	SIZE   = 10 //100_000_000
+	SIZE   = 1100_000_000
 	CHUNKS = 8
 )
 
@@ -37,6 +37,10 @@ var s sync.WaitGroup
 
 // maxChunks returns the maximum number of elements in a chunks.
 func maxChunks(data []int) int {
+	if len(data) == 0 {
+		return 0
+	}
+
 	chunkSize := len(data) / CHUNKS
 	var maxValuesFromChunks []int
 
