@@ -33,16 +33,16 @@ func maximum(data []int) int {
 	return slices.Max(data)
 }
 
-var s sync.WaitGroup
-
 // maxChunks returns the maximum number of elements in a chunks.
 func maxChunks(data []int) int {
+	var s sync.WaitGroup
+
 	if len(data) == 0 {
 		return 0
 	}
 
 	chunkSize := len(data) / CHUNKS
-	var maxValuesFromChunks []int
+	maxValuesFromChunks := make([]int, CHUNKS)
 
 	s.Add(CHUNKS)
 	for i := 0; i < CHUNKS; i++ {
@@ -53,10 +53,10 @@ func maxChunks(data []int) int {
 			x = len(data)
 		}
 
-		func(chunk []int) {
+		go func(chunk []int, i int) {
 			defer s.Done()
-			maxValuesFromChunks = append(maxValuesFromChunks, maximum(chunk))
-		}(data[j:x])
+			maxValuesFromChunks[i] = maximum(chunk)
+		}(data[j:x], i)
 	}
 	s.Wait()
 
